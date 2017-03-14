@@ -63,40 +63,48 @@ function getGHData(urlSuffix, data, dataType, callback) {
 }
 
 function getRepoData(repo, callback) {
-  getGHData('repos/adaptlearning/' + repo + '/pulls', function(prs) {
-    if(prs.length === 0) {
+  var progress = 0;
+  getGHData('repos/adaptlearning/' + repo + '/pulls', function(prsData) {
+    progress += 15;
+    if(prsData.length === 0) {
       return callback.call(this, []);
     }
-    var done = 0;
-    for(var i = 0, count = prs.length; i < count; i++) {
+    updateProgress(progress);
+    var prs = prsData.slice();
+    var progressChunk = (100-progress)/prs.length;
+    for(var i = 0, count = prs.length, done = 0; i < count; i++) {
       getReviewDataLoop(prs, i, function() {
-        done++;
-        if(done === prs.length) {
-          callback.call(this, prs.sort(sortPRs));
+        progress += progressChunk;
+        updateProgress(progress);
+        if(++done === prs.length) {
+          callback.call(this, prs.sort(sortPRsByReview));
         }
       });
     }
   });
 }
 
+function updateProgress(newProgress) {
+  console.log(newProgress);
+  $('.loading .bar .inner').css({ width: newProgress + '%' });
+  newProgress < 100 ? $('.loading .bar').fadeIn() : $('.loading .bar').fadeOut();
+}
+
+// modifies list in place
 function getReviewDataLoop(prs, index, callback) {
   var i = Number(index);
   var pr = prs[i];
-  getReviews(pr.base.repo.name, pr.number, function(reviews) {
-    if(reviews.length > 0) pr.reviews = organiseReviews(reviews);
-    callback.call(this);
-  });
-}
-
-function getReviews(repo, pr, callback) {
   $.ajax({
-    url: 'https://api.github.com/repos/adaptlearning/' + repo + '/pulls/' + pr + '/reviews',
+    url: 'https://api.github.com/repos/adaptlearning/' + pr.base.repo.name + '/pulls/' + pr.number + '/reviews',
     type: 'GET',
     headers: {
       Accept : "application/vnd.github.black-cat-preview+json",
       Authorization: 'token 15e160298d59a7a70ac7895c9766b0802735ac99'
     },
-    success: callback,
+    success: function(reviews) {
+      if(reviews.length > 0) pr.reviews = organiseReviews(reviews);
+      callback.call(this);
+    },
     error: console.log
   });
 }
@@ -106,36 +114,37 @@ function organiseReviews(reviews) {
     return;
   }
   var users = [];
-  var data = {
-    approved: [],
-    rejected: [],
-    commented: []
-  }
+  var data = { approved: [], rejected: [], commented: [] };
+
   for(var i = reviews.length-1; i >= 0; i--) {
     var review = reviews[i];
     // TODO ignore if review user is same as PR user
-    // only take into account the core team
-    if(!_.contains(CORE_REVIEWERS, review.user.login)) {
-      console.log(review.user.login, 'is not a core reviewer');
-      continue;
-    }
+
     // only get latest review from a user
-    if(_.contains(users, review.user.login)) {
-      continue;
+    if(!_.contains(users, review.user.login)) {
+      if(review.state === 'APPROVED') data.approved.push(review.user.login);
+      if(review.state === 'CHANGES_REQUESTED') data.rejected.push(review.user.login);
     }
+    if(review.state === 'COMMENTED' && !_.contains(data.commented, review.user.login)) {
+      data.commented.push(review.user.login);
+    }
+    // record who's done a review
     if(review.state === 'APPROVED' || review.state === 'CHANGES_REQUESTED') {
+      // only take into account the core team
+      if(!_.contains(CORE_REVIEWERS, review.user.login)) {
+        console.log('#' + review.pull_request_url.split('/').pop(), 'Ignoring', review.user.login + ', not a core reviewer');
+        continue;
+      }
       users.push(review.user.login);
     }
-    if(review.state === 'APPROVED') data.approved.push(review.user.login);
-    if(review.state === 'COMMENTED') data.commented.push(review.user.login);
-    if(review.state === 'CHANGES_REQUESTED') data.rejected.push(review.user.login);
   }
   if(data.approved.length === 0 && data.rejected.length === 0 && data.commented.length === 0) {
     return;
   }
   return data;
 }
-function sortPRs(a, b) {
+
+function sortPRsByReview(a, b) {
   if(!a.reviews && !b.reviews) {
     return 0;
   }
@@ -174,7 +183,7 @@ function renderRepoSelect(repos) {
   for(var i = 0, count = repos.length; i < count; i++) {
     htmlString += '<option value="' + repos[i].name + '">' + repos[i].name + '</option>'
   }
-  $('.select')
+  $('.select .inner')
     .append('<span class="repo-label">Repository:</span>')
     .append('<select id="repoSelect"></select>');
 
@@ -186,11 +195,11 @@ function renderRepoSelect(repos) {
 }
 
 function renderPRsForRepo(repoData) {
-  var $inner = $('.inner')
+  var $inner = $('body > .inner')
     .empty();
 
   if(repoData.length === 0) {
-    $inner.append('<div style="margin:50px 0 50px 0;text-align: center;opacity:0.5;">No pull requests found.</div>');
+    $inner.append('<div class="no-prs">No pull requests found.</div>');
   } else {
     $inner.append('<div class="prs"></div>');
     for(var i = 0, count = repoData.length; i < count; i++) renderPR(repoData[i]);
@@ -201,9 +210,8 @@ function renderPR(pr) {
   var template = getPRTemplate(pr);
   var $pr = $(template(pr));
 
-  $pr.click(function() {
-    window.open(pr.html_url);
-  });
+  // open PR's GitHub page on click
+  $pr.click(function() { window.open(pr.html_url); });
 
   if(!pr.reviews) {
     $pr.addClass('no-reviews');
@@ -215,7 +223,7 @@ function renderPR(pr) {
     for(var i = 0, count = pr.reviews.rejected.length; i < count; i++)
       icons += '<span class="rejected">&#10005;</span>';
 
-    $('.title', $pr).append(icons);
+    $('.title', $pr).append('<span class="icons">' + icons + '</span>');
 
     if(pr.reviews.approved.length === 3) $pr.addClass('approved');
     if(pr.reviews.rejected.length > 0) $pr.addClass('rejected');
@@ -263,5 +271,5 @@ function onSelectChanged(event) {
   var repo = $(event.currentTarget).val();
   CORE_REVIEWERS = repo === 'adapt_authoring' ? AT_CORE_REVIEWERS : FW_CORE_REVIEWERS;
   getRepoData(repo, renderPRsForRepo);
-  $('.inner').html('<div class="loading">Loading...</div>');
+  updateProgress(0);
 }
