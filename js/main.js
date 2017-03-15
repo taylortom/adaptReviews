@@ -208,7 +208,7 @@ function renderPRsForRepo(repoData) {
   } else {
     $inner.append('<div class="prs"></div>');
     for(var i = 0, count = repoData.length; i < count; i++) renderPR(repoData[i]);
-    $('.key').removeClass('disabled');
+    updateKeyFilters();
   }
 }
 
@@ -275,6 +275,19 @@ function updateReviewersOverlay() {
   for(var i = 0, count = CORE_REVIEWERS.length; i < count; i++) {
     $container.append('<div>' + CORE_REVIEWERS[i] + '</div>');
   }
+}
+
+function updateKeyFilters() {
+  var approved = $('.prs .pr.approved').length;
+  $('.key .pr.approved .count').html('(' + approved + ')');
+
+  var rejected = $('.prs .pr.rejected').length;
+  $('.key .pr.rejected .count').html('(' + rejected + ')');
+
+  var noReviews = $('.prs .pr.no-reviews').length;
+  $('.key .pr.no-reviews .count').html('(' + noReviews + ')');
+
+  $('.key').removeClass('disabled');
 }
 
 /**
