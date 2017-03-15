@@ -7,7 +7,6 @@ body {
 
 a {
   color: inherit;
-  text-decoration: none;
 }
 
 .loading {
@@ -110,10 +109,6 @@ body > .inner {
 .pr.rejected:hover {
   background-color: #ffd4d8;
 }
-/*.pr.commented {
-  border-left-color: #FFC107;
-  background-color: #fff3cf;
-}*/
 
 .pr.approved { color: #2cbe4e; }
 .pr.rejected { color: #cb2431; }
@@ -188,6 +183,7 @@ span.approved { color: #2cbe4e; }
 .footer a {
   margin-bottom: 3px;
   border-bottom: 1px solid black;
+  text-decoration: none;
 }
 .footer a:hover {
   color: blue;
