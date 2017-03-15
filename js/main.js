@@ -1,13 +1,13 @@
 var AT_CORE_REVIEWERS = [
-  'lc-thomasberger',
-  'tomgreenfield',
   'brian-learningpool',
-  'taylortom',
+  'canstudios-nicolaw',
+  'canstudios-paulh',
   'dancgray',
-  'canstudios-nicolaw'
+  'lc-thomasberger',
+  'taylortom',
+  'tomgreenfield'
 ];
 var FW_CORE_REVIEWERS = [
-  'moloko',
   'brian-learningpool',
   'cajones',
   'chris-steele',
@@ -15,6 +15,7 @@ var FW_CORE_REVIEWERS = [
   'danielghost',
   'dennis-learningpool',
   'lc-thomasberger',
+  'moloko',
   'oliverfoster',
   'taylortom',
   'tomgreenfield',
