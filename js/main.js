@@ -85,11 +85,6 @@ function getRepoData(repo, callback) {
   });
 }
 
-function updateProgress(newProgress) {
-  $('.loading .bar .inner').css({ width: newProgress + '%' });
-  newProgress < 100 ? $('.loading .bar').fadeIn() : $('.loading .bar').fadeOut();
-}
-
 // modifies list in place
 function getReviewDataLoop(prs, index, callback) {
   var i = Number(index);
@@ -267,6 +262,13 @@ function getReviewHTMLForPR(pr) {
     htmlString += '</div>';
   }
   return htmlString;
+}
+
+function updateProgress(newProgress) {
+  // just in case we're not passed a whole number
+  newProgress = Math.round(newProgress);
+  $('.loading .bar .inner').css({ width: newProgress + '%' });
+  newProgress < 100 ? $('.loading .bar').fadeIn() : $('.loading .bar').fadeOut();
 }
 
 function updateReviewersOverlay() {
