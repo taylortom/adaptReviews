@@ -85,7 +85,6 @@ function getRepoData(repo, callback) {
 }
 
 function updateProgress(newProgress) {
-  console.log(newProgress);
   $('.loading .bar .inner').css({ width: newProgress + '%' });
   newProgress < 100 ? $('.loading .bar').fadeIn() : $('.loading .bar').fadeOut();
 }
