@@ -23,6 +23,8 @@ var FW_CORE_REVIEWERS = [
 // set to one of the above based on repo
 var CORE_REVIEWERS;
 
+var NO_REQUIRED_APPROVALS = 3;
+
 $(function() {
   getGHData('orgs/adaptlearning/repos', function(repos) {
     $('body').show();
@@ -139,28 +141,39 @@ function organiseReviews(reviews) {
   return data;
 }
 
+/**
+* Prioritises like so:
+* 1. Mergable PRs come top
+* 2. Rejected PRs
+* 3. PRs with most approvals
+* 4. Reviewed PRs
+* 5. Un-reviewed PRs
+*/
 function sortPRsByReview(a, b) {
-  if(!a.reviews && !b.reviews) {
-    return 0;
-  }
-  if(!a.reviews) {
-    return 1;
-  }
-  if(!b.reviews) {
-    return -1;
-  }
-  if(a.reviews.rejected.length > b.reviews.rejected.length) {
-    return -1;
-  }
-  if(a.reviews.rejected.length < b.reviews.rejected.length) {
-    return 1;
-  }
-  if(a.reviews.approved.length > b.reviews.approved.length) {
-    return -1;
-  }
-  if(a.reviews.approved.length < b.reviews.approved.length) {
-    return 1;
-  }
+  // deal with missing reviews
+  if(!a.reviews && !b.reviews) return 0;
+  if(!a.reviews) return 1;
+  if(!b.reviews) return -1;
+
+  var approvedSort = sortByApproved(a, b);
+  var rejectedSort = sortByRejected(a, b);
+  var canMergeA = a.reviews.approved.length >= NO_REQUIRED_APPROVALS;
+  var canMergeB = b.reviews.approved.length >= NO_REQUIRED_APPROVALS;
+  // deal with mergeable PRs
+  if(canMergeA || canMergeB) return approvedSort;
+  // deal with the rest
+  return rejectedSort || approvedSort || 0;
+}
+
+function sortByApproved(a, b) {
+  if(a.reviews.approved.length > b.reviews.approved.length) return -1;
+  if(a.reviews.approved.length < b.reviews.approved.length) return 1;
+  return 0;
+}
+
+function sortByRejected(a, b) {
+  if(a.reviews.rejected.length > b.reviews.rejected.length) return -1;
+  if(a.reviews.rejected.length < b.reviews.rejected.length) return 1;
   return 0;
 }
 
@@ -226,7 +239,7 @@ function renderPR(pr) {
 
     $('.title', $pr).append('<span class="icons">' + icons + '</span>');
 
-    if(pr.reviews.approved.length === 3) $pr.addClass('approved');
+    if(pr.reviews.approved.length === NO_REQUIRED_APPROVALS) $pr.addClass('approved');
     if(pr.reviews.rejected.length > 0) $pr.addClass('rejected');
     if(pr.reviews.commented.length > 0) $pr.addClass('commented');
   }
