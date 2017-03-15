@@ -11,7 +11,7 @@ a {
 }
 
 .loading {
-  height: 40px;
+  height: 30px;
 }
 .loading .bar {
   display: none;
@@ -39,6 +39,28 @@ header {
 header > .inner {
   max-width: 800px;
   margin: 0 auto;
+}
+
+.intro {
+  max-width: 800px;
+  margin: 0 auto;
+  margin-bottom: 30px;
+}
+.reviewers {
+  display: inline-block;
+  text-decoration: underline;
+}
+.reviewers .overlay {
+  position: absolute;
+  margin-top: 10px;
+  display: none;
+  background-color: white;
+  border: 1px solid #bfccd1;
+  border-radius: 3px;
+  padding: 10px;
+}
+.reviewers:hover .overlay {
+  display: block;
 }
 
 .select {

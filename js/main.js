@@ -199,8 +199,9 @@ function renderRepoSelect(repos) {
 }
 
 function renderPRsForRepo(repoData) {
-  var $inner = $('body > .inner')
-    .empty();
+  var $inner = $('body > .inner');
+
+  $inner.empty();
 
   if(repoData.length === 0) {
     $inner.append('<div class="no-prs">No pull requests found.</div>');
@@ -268,6 +269,14 @@ function getReviewHTMLForPR(pr) {
   return htmlString;
 }
 
+function updateReviewersOverlay() {
+  var $container = $('.reviewers .overlay');
+  $container.empty();
+  for(var i = 0, count = CORE_REVIEWERS.length; i < count; i++) {
+    $container.append('<div>' + CORE_REVIEWERS[i] + '</div>');
+  }
+}
+
 /**
 * Events
 */
@@ -276,7 +285,10 @@ function onSelectChanged(event) {
   $('.key').addClass('disabled');
 
   var repo = $(event.currentTarget).val();
+
   CORE_REVIEWERS = repo === 'adapt_authoring' ? AT_CORE_REVIEWERS : FW_CORE_REVIEWERS;
+  updateReviewersOverlay();
+
   getRepoData(repo, renderPRsForRepo);
   updateProgress(0);
 }
