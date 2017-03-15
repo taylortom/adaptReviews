@@ -27,6 +27,7 @@ $(function() {
   getGHData('orgs/adaptlearning/repos', function(repos) {
     $('body').show();
     renderRepoSelect(repos);
+    initKeyFilter();
   });
 });
 
@@ -172,6 +173,10 @@ function sortPRsByReview(a, b) {
 * Rendering
 */
 
+function initKeyFilter() {
+  $('.key .pr-container').click(onKeyFilterClicked);
+}
+
 function renderRepoSelect(repos) {
   repos.sort(function(a, b) {
     if(a.name > b.name) return 1;
@@ -202,6 +207,7 @@ function renderPRsForRepo(repoData) {
   } else {
     $inner.append('<div class="prs"></div>');
     for(var i = 0, count = repoData.length; i < count; i++) renderPR(repoData[i]);
+    $('.key').removeClass('disabled');
   }
 }
 
@@ -267,8 +273,25 @@ function getReviewHTMLForPR(pr) {
 */
 
 function onSelectChanged(event) {
+  $('.key').addClass('disabled');
+
   var repo = $(event.currentTarget).val();
   CORE_REVIEWERS = repo === 'adapt_authoring' ? AT_CORE_REVIEWERS : FW_CORE_REVIEWERS;
   getRepoData(repo, renderPRsForRepo);
   updateProgress(0);
+}
+
+function onKeyFilterClicked(event) {
+  $('.prs .pr').hide();
+  $(event.currentTarget).toggleClass('enabled');
+  // get enabled keys
+  var enabled = $('.key .pr-container.enabled .pr');
+  var selector = '';
+  for(var i = 0, count = enabled.length; i < count; i++) {
+    var type = enabled[i].className.replace('enabled', '').replace('pr', '').trim();
+    selector += '.prs .pr.' + type + ',';
+  }
+  if(selector[selector.length-1] === ',') selector = selector.slice(0,-1);
+  // show all by default
+  $(selector || '.prs .pr').show();
 }
