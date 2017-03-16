@@ -252,7 +252,7 @@ function getPRTemplate(pr) {
   return _.template(
     '<div class="pr <%- number%>">' +
       '<div class="inner">' +
-        '<div class="title">#<%- number %>: <%- title %> <div class="author">by <span class="author"><%- user.login%></span></div></div>' +
+        '<div class="title">#<%- number %> to <%- base.ref %>: <%- title %> <div class="author">by <span class="author"><%- user.login%></span></div></div>' +
         '<div class="body"><%- body %></div>' +
         getReviewHTMLForPR(pr) +
       '</div>' +
