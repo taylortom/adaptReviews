@@ -150,6 +150,11 @@ span.approved { color: #2cbe4e; }
   display: block;
 }
 
+.pr a.patch {
+  font-size: 90%;
+  display: block;
+}
+
 .key {
   text-align: center;
 }

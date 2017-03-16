@@ -225,9 +225,6 @@ function renderPR(pr) {
   var template = getPRTemplate(pr);
   var $pr = $(template(pr));
 
-  // open PR's GitHub page on click
-  $pr.click(function() { window.open(pr.html_url); });
-
   if(!pr.reviews) {
     $pr.addClass('no-reviews');
   } else {
@@ -244,17 +241,21 @@ function renderPR(pr) {
     if(pr.reviews.rejected.length > 0) $pr.addClass('rejected');
     if(pr.reviews.commented.length > 0) $pr.addClass('commented');
   }
+  // add sone event listeners
+  $('a.patch', $pr).click(onPRPatchButtonClicked);
+  $pr.click(onPRButtonClicked);
 
   $('.prs').append($pr);
 }
 
 function getPRTemplate(pr) {
   return _.template(
-    '<div class="pr <%- number%>">' +
+    '<div class="pr <%- number%>" data-href="<%= html_url %>">' +
       '<div class="inner">' +
         '<div class="title">#<%- number %> to <%- base.ref %>: <%- title %> <div class="author">by <span class="author"><%- user.login%></span></div></div>' +
         '<div class="body"><%- body %></div>' +
         getReviewHTMLForPR(pr) +
+        '<a class="patch" href="' + pr.patch_url + '">View patch</a>' +
       '</div>' +
     '</div>'
   );
@@ -335,4 +336,16 @@ function onKeyFilterClicked(event) {
   if(selector[selector.length-1] === ',') selector = selector.slice(0,-1);
   // show all by default
   $(selector || '.prs .pr').show();
+}
+
+// link to git patch file
+function onPRPatchButtonClicked(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  window.open($(event.currentTarget).attr('href'));
+}
+
+// open PR's GitHub page on click
+function onPRButtonClicked(event) {
+  window.open($(event.currentTarget).attr('data-href'));
 }
