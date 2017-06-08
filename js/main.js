@@ -69,14 +69,18 @@ function getGHData(urlSuffix, data, dataType, callback) {
 
 function getRepoData(repo, callback) {
   var progress = 0;
-  getGHData('repos/adaptlearning/' + repo + '/pulls', function(prsData) {
-    progress += 15;
+  var progressChunk = 0;
 
+  getGHData('repos/adaptlearning/' + repo + '/pulls', function(prsData) {
+    if(!prsData || prsData.length === 0) {
+      return callback.call(this, []);
+    }
     getGHData('repos/adaptlearning/' + repo + '/milestones', function(milestoneData) {
-      if(prsData.length === 0) {
-        return callback.call(this, []);
-      }
+      progressChunk = 100/(prsData.length+2);
+      // we've already made 2 requests, so don't start at 0
+      progress = progressChunk*2;
       updateProgress(progress);
+
       var prs = prsData.slice();
       var progressChunk = (100-progress)/prs.length;
       for(var i = 0, count = prs.length, done = 0; i < count; i++) {
