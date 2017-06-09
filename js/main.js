@@ -210,7 +210,7 @@ function renderRepoSelect(repos) {
     htmlString += '<option value="' + repos[i].name + '">' + repos[i].name + '</option>'
   }
   $('.select .inner')
-    .append('<span class="repo-label">Repository:</span>')
+    .append('<span class="repo-label select-label">Repository:</span>')
     .append('<select id="repoSelect"></select>');
 
   $('#repoSelect').append(htmlString)
@@ -221,15 +221,28 @@ function renderRepoSelect(repos) {
 }
 
 function rendermilestonesSelect(milestones) {
+  if(!milestones || milestones.length === 0) {
+    $('#milestoneSelect').remove();
+    $('.milestone-label').remove();
+    return;
+  }
+
   var htmlString = '<option disabled selected>Select a milestone</option>';
+
+  if($('#milestoneSelect').length === 0) {
+    $('.select .inner')
+    .append('<span class="milestone-label select-label">Filter by milestone:</span>')
+    .append('<select id="milestoneSelect"></select>');
+  } else {
+    $('#milestoneSelect').empty();
+  }
+
   for(var i = 0, count = milestones.length; i < count; i++) {
     htmlString += '<option value="' + milestones[i].id + '" title="' + milestones[i].description + '">' + milestones[i].title + '</option>'
   }
-  $('.select .inner')
-    .append('<span class="repo-label">Filter by milestone:</span>')
-    .append('<select id="milestoneSelect"></select>');
 
-  $('#milestoneSelect').append(htmlString)
+  $('#milestoneSelect')
+    .append(htmlString)
     .change(filterPRs);
 }
 
