@@ -249,8 +249,6 @@ function rendermilestonesSelect(milestones) {
 function renderPRsForRepo(repoData) {
   var $inner = $('body > .inner');
 
-  $inner.empty();
-
   if(repoData.length === 0) {
     $inner.append('<div class="no-prs">No pull requests found.</div>');
   } else {
@@ -375,6 +373,8 @@ function filterPRs(event) {
 * Events
 */
 function onSelectChanged(event) {
+  $('body > .inner').empty();
+
   $('.key').addClass('disabled');
 
   var repo = $(event.currentTarget).val();
