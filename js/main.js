@@ -249,7 +249,7 @@ function rendermilestonesSelect(milestones) {
 function renderPRsForRepo(repoData) {
   var $inner = $('body > .inner');
 
-  if(repoData.length === 0) {
+  if(!repoData || repoData.length === 0) {
     $inner.append('<div class="no-prs">No pull requests found.</div>');
   } else {
     $inner.append('<div class="prs"></div>');
