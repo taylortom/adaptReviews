@@ -5,7 +5,9 @@ var AT_CORE_REVIEWERS = [
   'dancgray',
   'lc-thomasberger',
   'taylortom',
-  'tomgreenfield'
+  'tomgreenfield',
+  'canstudios-louisem',
+  'canstudios-nicolaw'
 ];
 var FW_CORE_REVIEWERS = [
   'brian-learningpool',
@@ -100,14 +102,14 @@ function getReviewDataLoop(prs, index, callback) {
       Authorization: 'token 15e160298d59a7a70ac7895c9766b0802735ac99'
     },
     success: function(reviews) {
-      if(reviews.length > 0) pr.reviews = organiseReviews(reviews);
+      if(reviews.length > 0) pr.reviews = organiseReviews(pr, reviews);
       callback.call(this);
     },
     error: console.log
   });
 }
 
-function organiseReviews(reviews) {
+function organiseReviews(pr, reviews) {
   if(reviews.length === 0) {
     return;
   }
@@ -116,8 +118,10 @@ function organiseReviews(reviews) {
 
   for(var i = reviews.length-1; i >= 0; i--) {
     var review = reviews[i];
-    // TODO ignore if review user is same as PR user
-
+    // ignore if review user is same as PR user
+    if(review.user.login === pr.user.login) {
+      continue;
+    }
     // only get latest review from a user
     if(!_.contains(users, review.user.login)) {
       if(review.state === 'APPROVED') data.approved.push(review.user.login);
@@ -255,9 +259,9 @@ function getPRTemplate(pr) {
         '<div class="title">#<%- number %> to <%- base.ref %>: <%- title %> <div class="author">by <span class="author"><%- user.login%></span></div></div>' +
         '<div class="body"><%- body %></div>' +
         getReviewHTMLForPR(pr) +
-        '<a class="patch" href="' + pr.patch_url + '">View patch</a>' +
+        // '<a class="patch" href="' + pr.patch_url + '">View patch</a>' +
       '</div>' +
-    '</div>'
+      '</div>'
   );
 }
 
