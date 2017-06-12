@@ -99,6 +99,7 @@ body > .inner {
   border-left-color: #2cbe4e;
   background-color: #d3ffdd;
 }
+.pr.approved .controls { background-color: #2cbe4e }
 .pr.approved:hover {
   background-color: #beffcd;
 }
@@ -106,19 +107,20 @@ body > .inner {
   border-left-color: #cb2431;
   background-color: #ffe1e4;
 }
+.pr.approved .controls { background-color: #cb2431 }
 .pr.rejected:hover {
   background-color: #ffd4d8;
 }
 
 .pr.approved { color: #2cbe4e; }
+span.approved { color: #2cbe4e; }
+
 .pr.rejected { color: #cb2431; }
 
 .pr.no-reviews {
   border-left-color: #a2b1b7;
   color: #a2b1b7;
 }
-
-span.approved { color: #2cbe4e; }
 
 .pr .title {
   display: inline-block;
