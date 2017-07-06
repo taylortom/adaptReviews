@@ -24,7 +24,7 @@ var FW_CORE_REVIEWERS = [
 ];
 // set to one of the above based on repo
 var CORE_REVIEWERS;
-
+// TODO support this
 var REQD_CORE_APPROVALS = 2;
 var REQD_APPROVALS = 3;
 
