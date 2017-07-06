@@ -25,12 +25,28 @@ var FW_CORE_REVIEWERS = [
 // set to one of the above based on repo
 var CORE_REVIEWERS;
 
-var NO_REQUIRED_APPROVALS = 3;
+var REQD_CORE_APPROVALS = 2;
+var REQD_APPROVALS = 3;
 
 $(function() {
+
   getGHData('orgs/adaptlearning/repos', function(repos) {
     $('body').show();
     renderRepoSelect(repos);
+
+    var locData = window.location.hash.slice(1).split('/');
+    var repo = locData[0];
+    var milestone = locData[1];
+    if(repo) {
+      selectRepo(repo);
+      if(milestone) {
+        $(document).on('prs:render', function() {
+          $(document).off('prs:render');
+          selectMilestone(milestone);
+        });
+      }
+    }
+
     initKeyFilter();
   });
 });
@@ -171,8 +187,8 @@ function sortPRsByReview(a, b) {
 
   var approvedSort = sortByApproved(a, b);
   var rejectedSort = sortByRejected(a, b);
-  var canMergeA = a.reviews.approved.length >= NO_REQUIRED_APPROVALS;
-  var canMergeB = b.reviews.approved.length >= NO_REQUIRED_APPROVALS;
+  var canMergeA = a.reviews.approved.length >= REQD_APPROVALS;
+  var canMergeB = b.reviews.approved.length >= REQD_APPROVALS;
   // deal with mergeable PRs
   if(canMergeA || canMergeB) return approvedSort;
   // deal with the rest
@@ -215,9 +231,6 @@ function renderRepoSelect(repos) {
 
   $('#repoSelect').append(htmlString)
     .change(onSelectChanged);
-
-  $('#repoSelect').val('adapt_authoring');
-  onSelectChanged({ currentTarget: $('#repoSelect') });
 }
 
 function rendermilestonesSelect(milestones) {
@@ -244,6 +257,8 @@ function rendermilestonesSelect(milestones) {
   $('#milestoneSelect')
     .append(htmlString)
     .change(filterPRs);
+
+  $(document).trigger('milestone:render');
 }
 
 function renderPRsForRepo(repoData) {
@@ -256,6 +271,7 @@ function renderPRsForRepo(repoData) {
     for(var i = 0, count = repoData.length; i < count; i++) renderPR(repoData[i]);
     updateKeyFilters();
   }
+  $(document).trigger('prs:render');
 }
 
 function renderPR(pr) {
@@ -273,7 +289,7 @@ function renderPR(pr) {
 
     $('.title', $pr).append('<span class="icons">' + icons + '</span>');
 
-    if(pr.reviews.approved.length === NO_REQUIRED_APPROVALS) $pr.addClass('approved');
+    if(pr.reviews.approved.length === REQD_APPROVALS) $pr.addClass('approved');
     if(pr.reviews.rejected.length > 0) $pr.addClass('rejected');
     if(pr.reviews.commented.length > 0) $pr.addClass('commented');
   }
@@ -362,11 +378,29 @@ function filterPRs(event) {
   // now filter by milestone
   var milestone = $('#milestoneSelect').val();
   if(!milestone) return;
+
+  updateHash($('#repoSelect').val(), milestone);
+
   var prs = $('.prs .pr');
   for(var i = 0, count = prs.length; i < count; i++) {
     var $pr = $(prs[i]);
     if($pr.attr('data-milestone') !== milestone) $pr.hide();
   }
+}
+
+function selectRepo(repoName) {
+  $('#repoSelect').val(repoName);
+  onSelectChanged({ currentTarget: $('#repoSelect') });
+}
+
+function selectMilestone(milestoneId) {
+  $('#milestoneSelect').val(milestoneId);
+  filterPRs({ currentTarget: $('#milestoneSelect') });
+}
+
+function updateHash(repo, milestone) {
+  if(!repo) return;
+  window.location.hash = '#' + repo + (milestone ? '/' + milestone : '');
 }
 
 /**
@@ -378,6 +412,8 @@ function onSelectChanged(event) {
   $('.key').addClass('disabled');
 
   var repo = $(event.currentTarget).val();
+
+  updateHash(repo);
 
   CORE_REVIEWERS = repo === 'adapt_authoring' ? AT_CORE_REVIEWERS : FW_CORE_REVIEWERS;
   updateReviewersOverlay();
