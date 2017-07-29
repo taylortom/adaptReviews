@@ -1,13 +1,12 @@
 var AT_CORE_REVIEWERS = [
   'brian-learningpool',
+  'canstudios-louisem',
   'canstudios-nicolaw',
   'canstudios-paulh',
   'dancgray',
   'lc-thomasberger',
   'taylortom',
-  'tomgreenfield',
-  'canstudios-louisem',
-  'canstudios-nicolaw'
+  'tomgreenfield'
 ];
 var FW_CORE_REVIEWERS = [
   'brian-learningpool',
