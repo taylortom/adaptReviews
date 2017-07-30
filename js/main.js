@@ -71,21 +71,27 @@ function getRepoData(repo, callback) {
   var progress = 0;
   getGHData('repos/adaptlearning/' + repo + '/pulls', function(prsData) {
     progress += 15;
-    if(prsData.length === 0) {
-      return callback.call(this, []);
-    }
-    updateProgress(progress);
-    var prs = prsData.slice();
-    var progressChunk = (100-progress)/prs.length;
-    for(var i = 0, count = prs.length, done = 0; i < count; i++) {
-      getReviewDataLoop(prs, i, function() {
-        progress += progressChunk;
-        updateProgress(progress);
-        if(++done === prs.length) {
-          callback.call(this, prs.sort(sortPRsByReview));
-        }
-      });
-    }
+
+    getGHData('repos/adaptlearning/' + repo + '/milestones', function(milestoneData) {
+      if(prsData.length === 0) {
+        return callback.call(this, []);
+      }
+      updateProgress(progress);
+      var prs = prsData.slice();
+      var progressChunk = (100-progress)/prs.length;
+      for(var i = 0, count = prs.length, done = 0; i < count; i++) {
+        getReviewDataLoop(prs, i, function() {
+          progress += progressChunk;
+          updateProgress(progress);
+          if(++done === prs.length) {
+            callback.call(this, {
+              prs: prs.sort(sortPRsByReview),
+              milestones: milestoneData
+            });
+          }
+        });
+      }
+    });
   });
 }
 
@@ -186,7 +192,7 @@ function sortByRejected(a, b) {
 */
 
 function initKeyFilter() {
-  $('.key .pr-container').click(onKeyFilterClicked);
+  $('.key .pr-container').click(filterPRs);
 }
 
 function renderRepoSelect(repos) {
@@ -210,6 +216,19 @@ function renderRepoSelect(repos) {
   onSelectChanged({ currentTarget: $('#repoSelect') });
 }
 
+function rendermilestonesSelect(milestones) {
+  var htmlString = '<option disabled selected>Select a milestone</option>';
+  for(var i = 0, count = milestones.length; i < count; i++) {
+    htmlString += '<option value="' + milestones[i].id + '" title="' + milestones[i].description + '">' + milestones[i].title + '</option>'
+  }
+  $('.select .inner')
+    .append('<span class="repo-label">Filter by milestone:</span>')
+    .append('<select id="milestoneSelect"></select>');
+
+  $('#milestoneSelect').append(htmlString)
+    .change(filterPRs);
+}
+
 function renderPRsForRepo(repoData) {
   var $inner = $('body > .inner');
 
@@ -227,7 +246,6 @@ function renderPRsForRepo(repoData) {
 function renderPR(pr) {
   var template = getPRTemplate(pr);
   var $pr = $(template(pr));
-
   if(!pr.reviews) {
     $pr.addClass('no-reviews');
   } else {
@@ -253,12 +271,12 @@ function renderPR(pr) {
 
 function getPRTemplate(pr) {
   return _.template(
-    '<div class="pr <%- number%>" data-href="<%= html_url %>">' +
+    '<div class="pr <%- number%>" data-href="<%= html_url %>" data-milestone="<%- milestone && milestone.id || null %>">' +
       '<div class="inner">' +
         '<div class="title">#<%- number %> to <%- base.ref %>: <%- title %> <div class="author">by <span class="author"><%- user.login%></span></div></div>' +
         '<div class="body"><%- body %></div>' +
         getReviewHTMLForPR(pr) +
-        // '<a class="patch" href="' + pr.patch_url + '">View patch</a>' +
+        '<a class="patch" href="' + pr.patch_url + '">View patch</a>' +
       '</div>' +
       '</div>'
   );
@@ -310,25 +328,12 @@ function updateKeyFilters() {
   $('.key').removeClass('disabled');
 }
 
-/**
-* Events
-*/
-
-function onSelectChanged(event) {
-  $('.key').addClass('disabled');
-
-  var repo = $(event.currentTarget).val();
-
-  CORE_REVIEWERS = repo === 'adapt_authoring' ? AT_CORE_REVIEWERS : FW_CORE_REVIEWERS;
-  updateReviewersOverlay();
-
-  getRepoData(repo, renderPRsForRepo);
-  updateProgress(0);
-}
-
-function onKeyFilterClicked(event) {
+function filterPRs(event) {
   $('.prs .pr').hide();
-  $(event.currentTarget).toggleClass('enabled');
+  // it's a key button
+  if(!$(event.currentTarget).attr('data-href')) {
+    $(event.currentTarget).toggleClass('enabled');
+  }
   // get enabled keys
   var enabled = $('.key .pr-container.enabled .pr');
   var selector = '';
@@ -339,6 +344,32 @@ function onKeyFilterClicked(event) {
   if(selector[selector.length-1] === ',') selector = selector.slice(0,-1);
   // show all by default
   $(selector || '.prs .pr').show();
+  // now filter by milestone
+  var milestone = $('#milestoneSelect').val();
+  if(!milestone) return;
+  var prs = $('.prs .pr');
+  for(var i = 0, count = prs.length; i < count; i++) {
+    var $pr = $(prs[i]);
+    if($pr.attr('data-milestone') !== milestone) $pr.hide();
+  }
+}
+
+/**
+* Events
+*/
+function onSelectChanged(event) {
+  $('.key').addClass('disabled');
+
+  var repo = $(event.currentTarget).val();
+
+  CORE_REVIEWERS = repo === 'adapt_authoring' ? AT_CORE_REVIEWERS : FW_CORE_REVIEWERS;
+  updateReviewersOverlay();
+
+  getRepoData(repo, function(repoData) {
+    rendermilestonesSelect(repoData.milestones);
+    renderPRsForRepo(repoData.prs);
+  });
+  updateProgress(0);
 }
 
 // link to git patch file
