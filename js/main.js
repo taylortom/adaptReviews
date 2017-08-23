@@ -140,7 +140,7 @@ function getReviewDataLoop(prs, index, callback) {
           Authorization: 'token 15e160298d59a7a70ac7895c9766b0802735ac99'
         },
         success: function(statuses) {
-          pr.status = statuses.length && statuses[0].state;
+          pr.status = statuses.length && statuses[0];
           callback.call(this);
         },
         error: console.log
@@ -307,7 +307,7 @@ function renderPR(pr) {
 
     if(pr.status) {
       var statusMsg = 'checks ';
-      switch(pr.status) {
+      switch(pr.status.state) {
         case STATUSES.Pending:
           statusMsg += 'in progress';
           break;
@@ -321,7 +321,7 @@ function renderPR(pr) {
           statusMsg += 'failed';
           break;
       }
-      $('.title', $pr).append('<span class="status ' + pr.status + '">' + statusMsg + '</span>');
+      $('.title', $pr).append('<a href="' + pr.status.target_url + '" class="status ' + pr.status.state + '">' + statusMsg + '</a>');
     }
 
     if(pr.reviews.approved.length === REQD_APPROVALS) $pr.addClass('approved');
@@ -329,7 +329,8 @@ function renderPR(pr) {
     if(pr.reviews.commented.length > 0) $pr.addClass('commented');
   }
   // add sone event listeners
-  $('a.patch', $pr).click(onPRPatchButtonClicked);
+  $('a.patch', $pr).click(onPRChildButtonClicked);
+  $('a.status', $pr).click(onPRChildButtonClicked);
   $pr.click(onPRButtonClicked);
 
   $('.prs').append($pr);
@@ -460,8 +461,7 @@ function onSelectChanged(event) {
   updateProgress(0);
 }
 
-// link to git patch file
-function onPRPatchButtonClicked(event) {
+function onPRChildButtonClicked(event) {
   event.preventDefault();
   event.stopPropagation();
   window.open($(event.currentTarget).attr('href'));

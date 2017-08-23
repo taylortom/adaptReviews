@@ -123,7 +123,12 @@ span.approved { color: #2cbe4e; }
   font-size: 80%;
   color: white;
   border-radius: 3px;
+  text-decoration: none;
 }
+.pr .status:hover {
+  text-decoration: underline;
+}
+
 .pr .status.pending { background-color: #ffc107; }
 .pr .status.success { background-color: #2cbe4e; }
 .pr .status.fail, .pr .status.error { background-color: #cb2431; }
@@ -165,7 +170,9 @@ span.approved { color: #2cbe4e; }
 
 .pr a.patch {
   font-size: 90%;
-  display: block;
+}
+.pr a.patch:hover {
+  font-weight: bold;
 }
 
 .key {
