@@ -285,7 +285,7 @@ function renderPRsForRepo(repoData) {
   } else {
     $inner.append('<div class="prs"></div>');
     for(var i = 0, count = repoData.length; i < count; i++) renderPR(repoData[i]);
-    updateKeyFilters();
+    // updateKeyFilters();
   }
   $(document).trigger('prs:render');
 }
@@ -383,13 +383,13 @@ function updateReviewersOverlay() {
 }
 
 function updateKeyFilters() {
-  var approved = $('.prs .pr.approved').length;
+  var approved = $('.prs .pr.approved:visible').length;
   $('.key .pr.approved .count').html('(' + approved + ')');
 
-  var rejected = $('.prs .pr.rejected').length;
+  var rejected = $('.prs .pr.rejected:visible').length;
   $('.key .pr.rejected .count').html('(' + rejected + ')');
 
-  var noReviews = $('.prs .pr.no-reviews').length;
+  var noReviews = $('.prs .pr.no-reviews:visible').length;
   $('.key .pr.no-reviews .count').html('(' + noReviews + ')');
 
   $('.key').removeClass('disabled');
@@ -457,6 +457,7 @@ function onSelectChanged(event) {
   getRepoData(repo, function(repoData) {
     rendermilestonesSelect(repoData.milestones);
     renderPRsForRepo(repoData.prs);
+    updateKeyFilters();
   });
   updateProgress(0);
 }
