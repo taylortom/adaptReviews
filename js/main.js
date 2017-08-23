@@ -256,7 +256,8 @@ function rendermilestonesSelect(milestones) {
     return;
   }
 
-  var htmlString = '<option disabled selected>Select a milestone</option>';
+  var htmlString = '<option disabled selected>Select a milestone</option>' +
+    '<option value="">All</option>';
 
   if($('#milestoneSelect').length === 0) {
     $('.select .inner')
@@ -411,12 +412,14 @@ function filterPRs(event) {
   if(selector[selector.length-1] === ',') selector = selector.slice(0,-1);
   // show all by default
   $(selector || '.prs .pr').show();
-  // now filter by milestone
+
   var milestone = $('#milestoneSelect').val();
-  if(!milestone) return;
 
   updateHash($('#repoSelect').val(), milestone);
 
+  if(!milestone) return;
+
+  // now filter by milestone
   var prs = $('.prs .pr');
   for(var i = 0, count = prs.length; i < count; i++) {
     var $pr = $(prs[i]);
@@ -430,6 +433,7 @@ function selectRepo(repoName) {
 }
 
 function selectMilestone(milestoneId) {
+  if(!milestoneId) return;
   $('#milestoneSelect').val(milestoneId);
   filterPRs({ currentTarget: $('#milestoneSelect') });
 }
