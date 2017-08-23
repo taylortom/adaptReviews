@@ -22,6 +22,12 @@ var FW_CORE_REVIEWERS = [
   'tomgreenfield',
   'zenduo'
 ];
+var STATUSES = {
+  Success: 'success',
+  Pending: 'pending',
+  Error: 'error',
+  Failure: 'failure'
+};
 // set to one of the above based on repo
 var CORE_REVIEWERS;
 // TODO support this
@@ -29,7 +35,6 @@ var REQD_CORE_APPROVALS = 2;
 var REQD_APPROVALS = 3;
 
 $(function() {
-
   getGHData('orgs/adaptlearning/repos', function(repos) {
     $('body').show();
     renderRepoSelect(repos);
@@ -46,7 +51,6 @@ $(function() {
         });
       }
     }
-
     initKeyFilter();
   });
 });
@@ -128,7 +132,19 @@ function getReviewDataLoop(prs, index, callback) {
     },
     success: function(reviews) {
       if(reviews.length > 0) pr.reviews = organiseReviews(pr, reviews);
-      callback.call(this);
+      $.ajax({
+        url: pr.statuses_url,
+        type: 'GET',
+        headers: {
+          Accept : "application/vnd.github.black-cat-preview+json",
+          Authorization: 'token 15e160298d59a7a70ac7895c9766b0802735ac99'
+        },
+        success: function(statuses) {
+          pr.status = statuses.length && statuses[0].state;
+          callback.call(this);
+        },
+        error: console.log
+      });
     },
     error: console.log
   });
@@ -288,6 +304,25 @@ function renderPR(pr) {
       icons += '<span class="rejected">&#10005;</span>';
 
     $('.title', $pr).append('<span class="icons">' + icons + '</span>');
+
+    if(pr.status) {
+      var statusMsg = 'checks ';
+      switch(pr.status) {
+        case STATUSES.Pending:
+          statusMsg += 'in progress';
+          break;
+        case STATUSES.Success:
+          statusMsg += 'passed';
+          break;
+        case STATUSES.Error:
+          statusMsg += 'errored';
+          break;
+        case STATUSES.Failure:
+          statusMsg += 'failed';
+          break;
+      }
+      $('.title', $pr).append('<span class="status ' + pr.status + '">' + statusMsg + '</span>');
+    }
 
     if(pr.reviews.approved.length === REQD_APPROVALS) $pr.addClass('approved');
     if(pr.reviews.rejected.length > 0) $pr.addClass('rejected');

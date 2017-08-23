@@ -117,6 +117,17 @@ span.approved { color: #2cbe4e; }
 
 .pr.rejected { color: #cb2431; }
 
+.pr .status {
+  padding: 0 3px;
+  margin-left: 10px;
+  font-size: 80%;
+  color: white;
+  border-radius: 3px;
+}
+.pr .status.pending { background-color: #ffc107; }
+.pr .status.success { background-color: #2cbe4e; }
+.pr .status.fail, .pr .status.error { background-color: #cb2431; }
+
 .pr.no-reviews {
   border-left-color: #a2b1b7;
   color: #a2b1b7;
