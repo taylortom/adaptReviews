@@ -325,7 +325,7 @@ function renderPR(pr) {
       $('.title', $pr).append('<a href="' + pr.status.target_url + '" class="status ' + pr.status.state + '">' + statusMsg + '</a>');
     }
 
-    if(pr.reviews.approved.length === REQD_APPROVALS) $pr.addClass('approved');
+    if(pr.reviews.approved.length >= REQD_APPROVALS) $pr.addClass('approved');
     if(pr.reviews.rejected.length > 0) $pr.addClass('rejected');
     if(pr.reviews.commented.length > 0) $pr.addClass('commented');
   }
