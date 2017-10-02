@@ -39,7 +39,7 @@ $(function() {
     $('body').show();
     renderRepoSelect(repos);
 
-    var locData = window.location.hash.slice(1).split('/');
+    var locData = window.location.search.substring(1).split('/');
     var repo = locData[0];
     var milestone = locData[1];
     if(repo) {
