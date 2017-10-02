@@ -1,0 +1,22 @@
+{
+  "name": "adapt-reviews-widget",
+  "version": "0.0.1",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taylortom/adaptReviews-desktop.git"
+  },
+  "author": "Thomas Taylor <me@taylortom.co.uk> (http://taylortom.co.uk/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/taylortom/adaptReviews-desktop/issues"
+  },
+  "homepage": "https://github.com/taylortom/adaptReviews-desktop#readme",
+  "devDependencies": {
+    "electron": "^1.7.8"
+  }
+}
