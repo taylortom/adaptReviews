@@ -140,13 +140,14 @@ function getReviewDataLoop(prs, index, callback) {
         },
         success: function(statuses) {
           getGHData('repos/' + pr.head.repo.full_name + '/commits/' + pr.head.ref, function(commitData) {
-            if(reviews.length > 0) pr.reviews = organiseReviews(pr, reviews);
-            pr.status = statuses.length && statuses[0];
             pr.latestCommit = commitData;
+            pr.status = statuses.length && statuses[0];
+            if(reviews.length > 0) pr.reviews = organiseReviews(pr, reviews);
             callback.call(this);
           });
         },
         error: console.log
+      });
     },
     error: console.log
   });
@@ -156,11 +157,9 @@ function organiseReviews(pr, reviews) {
   if(reviews.length === 0) {
     return;
   }
+  var lastCommitDate = new Date(pr.latestCommit.commit.author.date);
   var users = [];
   var data = { approved: [], rejected: [], commented: [] };
-
-  var lastCommitDate = new Date(pr.latestCommit.commit.author.date);
-  console.log(pr.latestCommit.commit.author.date);
 
   for(var i = reviews.length-1; i >= 0; i--) {
     var review = reviews[i];
@@ -442,7 +441,7 @@ function selectRepo(repoName) {
 }
 
 function selectMilestone(milestoneId) {
-  if(!milestoneId) return; 
+  if(!milestoneId) return;
   $('#milestoneSelect').val(milestoneId);
   filterPRs({ currentTarget: $('#milestoneSelect') });
 }
