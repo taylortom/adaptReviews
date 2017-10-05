@@ -131,7 +131,6 @@ function getReviewDataLoop(prs, index, callback) {
       Authorization: 'token 15e160298d59a7a70ac7895c9766b0802735ac99'
     },
     success: function(reviews) {
-      if(reviews.length > 0) pr.reviews = organiseReviews(pr, reviews);
       $.ajax({
         url: pr.statuses_url,
         type: 'GET',
@@ -140,11 +139,14 @@ function getReviewDataLoop(prs, index, callback) {
           Authorization: 'token 15e160298d59a7a70ac7895c9766b0802735ac99'
         },
         success: function(statuses) {
-          pr.status = statuses.length && statuses[0];
-          callback.call(this);
+          getGHData('repos/' + pr.head.repo.full_name + '/commits/' + pr.head.ref, function(commitData) {
+            if(reviews.length > 0) pr.reviews = organiseReviews(pr, reviews);
+            pr.status = statuses.length && statuses[0];
+            pr.latestCommit = commitData;
+            callback.call(this);
+          });
         },
         error: console.log
-      });
     },
     error: console.log
   });
@@ -157,10 +159,17 @@ function organiseReviews(pr, reviews) {
   var users = [];
   var data = { approved: [], rejected: [], commented: [] };
 
+  var lastCommitDate = new Date(pr.latestCommit.commit.author.date);
+  console.log(pr.latestCommit.commit.author.date);
+
   for(var i = reviews.length-1; i >= 0; i--) {
     var review = reviews[i];
     // ignore if review user is same as PR user
     if(review.user.login === pr.user.login) {
+      continue;
+    }
+    // ignore any reviews before the last commit
+    if(new Date(review.submitted_at) < lastCommitDate) {
       continue;
     }
     // only get latest review from a user
@@ -433,7 +442,7 @@ function selectRepo(repoName) {
 }
 
 function selectMilestone(milestoneId) {
-  if(!milestoneId) return;
+  if(!milestoneId) return; 
   $('#milestoneSelect').val(milestoneId);
   filterPRs({ currentTarget: $('#milestoneSelect') });
 }
