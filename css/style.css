@@ -140,6 +140,7 @@ span.approved { color: #2cbe4e; }
 
 .pr .title {
   display: inline-block;
+  margin-right: 10px;
   font-weight: 400;
   font-size: 16px;
 }
