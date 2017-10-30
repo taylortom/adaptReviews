@@ -445,12 +445,18 @@ function filterPRs(event) {
 
 function selectRepo(repoName) {
   $('#repoSelect').val(repoName);
+  if(!$('#repoSelect').val()) {
+    alert('Cannot load PRs for unknown repository: ' + repoName);
+  }
   onSelectChanged({ currentTarget: $('#repoSelect') });
 }
 
 function selectMilestone(milestoneId) {
   if(!milestoneId) return;
   $('#milestoneSelect').val(milestoneId);
+  if(!$('#milestoneSelect').val()) {
+    alert('Unknown milestone: ' + milestoneId + '\nShowing all milestones.');
+  }
   filterPRs({ currentTarget: $('#milestoneSelect') });
 }
 
