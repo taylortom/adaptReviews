@@ -34,6 +34,11 @@ var CORE_REVIEWERS;
 var REQD_CORE_APPROVALS = 2;
 var REQD_APPROVALS = 3;
 
+function getToken() {
+  // read-only access to public repos
+  return 'c5f9aefd5150e059d7c3353449fe148c01e67b02';
+}
+
 $(function() {
   CORE_REVIEWERS = _.uniq(AT_CORE_REVIEWERS.concat(FW_CORE_REVIEWERS));
   updateReviewersOverlay();
@@ -75,7 +80,7 @@ function getGHData(urlSuffix, data, dataType, callback) {
     data: _.extend({ per_page: 50 }, data),
     dataType: dataType,
     headers: {
-      Authorization: 'token 15e160298d59a7a70ac7895c9766b0802735ac99'
+      Authorization: 'token ' + getToken()
     },
     success: callback,
     error: function(jqXHR) {
@@ -131,7 +136,7 @@ function getReviewDataLoop(prs, index, callback) {
     type: 'GET',
     headers: {
       Accept : "application/vnd.github.black-cat-preview+json",
-      Authorization: 'token 15e160298d59a7a70ac7895c9766b0802735ac99'
+      Authorization: 'token ' + getToken()
     },
     success: function(reviews) {
       $.ajax({
@@ -139,7 +144,7 @@ function getReviewDataLoop(prs, index, callback) {
         type: 'GET',
         headers: {
           Accept : "application/vnd.github.black-cat-preview+json",
-          Authorization: 'token 15e160298d59a7a70ac7895c9766b0802735ac99'
+          Authorization: 'token ' + getToken()
         },
         success: function(statuses) {
           getGHData('repos/' + pr.head.repo.full_name + '/commits/' + pr.head.ref, function(commitData) {
