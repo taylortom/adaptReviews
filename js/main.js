@@ -35,6 +35,9 @@ var REQD_CORE_APPROVALS = 2;
 var REQD_APPROVALS = 3;
 
 $(function() {
+  CORE_REVIEWERS = _.uniq(AT_CORE_REVIEWERS.concat(FW_CORE_REVIEWERS));
+  updateReviewersOverlay();
+
   getGHData('orgs/adaptlearning/repos', function(repos) {
     $('body').show();
     renderRepoSelect(repos);
