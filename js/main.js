@@ -455,7 +455,8 @@ function selectMilestone(milestoneId) {
   if(!milestoneId) return;
   $('#milestoneSelect').val(milestoneId);
   if(!$('#milestoneSelect').val()) {
-    alert('Unknown milestone: ' + milestoneId + '\nShowing all milestones.');
+    alert('Unknown milestone, showing all milestones.');
+    $('#milestoneSelect').val('');
   }
   filterPRs({ currentTarget: $('#milestoneSelect') });
 }
