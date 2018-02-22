@@ -84,13 +84,14 @@ function getGHData(urlSuffix, data, dataType, callback) {
     },
     success: callback,
     error: function(jqXHR) {
+      var error;
       if(jqXHR.responseJSON) {
-        console.log(jqXHR.responseJSON.message + '\n' + jqXHR.responseJSON.documentation_url);
+        error = jqXHR.responseJSON.message + '\n' + jqXHR.responseJSON.documentation_url;
       }
       else if(jqXHR.statusText) {
-        console.log(jqXHR.statusText);
+        error = jqXHR.statusText;
       }
-      console.log(jqXHR);
+      throw new Error(error);
     }
   });
 }
