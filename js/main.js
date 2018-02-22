@@ -147,7 +147,7 @@ function getReviewDataLoop(prs, index, callback) {
           Authorization: 'token ' + getToken()
         },
         success: function(statuses) {
-          getGHData('repos/' + pr.head.repo.full_name + '/commits/' + pr.head.ref, function(commitData) {
+          getGHData('repos/' + pr.head.repo.full_name + '/commits/' + pr.head.sha, function(commitData) {
             pr.latestCommit = commitData;
             pr.status = statuses.length && statuses[0];
             if(reviews.length > 0) pr.reviews = organiseReviews(pr, reviews);
