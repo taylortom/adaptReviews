@@ -32,8 +32,9 @@ var STATUSES = {
 var CORE_REVIEWERS;
 // TODO support this
 var REQD_CORE_APPROVALS = 2;
-var REQD_APPROVALS = 3;
+var REQD_APPROVALS = 2;
 
+// TODO API stuff should move server-side if we do anything more compplex...
 function getToken() {
   // read-only access to public repos
   return 'c5f9aefd5150e059d7c3353449fe148c01e67b02';
@@ -180,11 +181,6 @@ function organiseReviews(pr, reviews) {
     if(new Date(review.submitted_at) < lastCommitDate) {
       continue;
     }
-    // only get latest review from a user
-    if(!_.contains(users, review.user.login)) {
-      if(review.state === 'APPROVED') data.approved.push(review.user.login);
-      if(review.state === 'CHANGES_REQUESTED') data.rejected.push(review.user.login);
-    }
     if(review.state === 'COMMENTED' && !_.contains(data.commented, review.user.login)) {
       data.commented.push(review.user.login);
     }
@@ -194,6 +190,11 @@ function organiseReviews(pr, reviews) {
       if(!_.contains(CORE_REVIEWERS, review.user.login)) {
         console.log('#' + review.pull_request_url.split('/').pop(), 'Ignoring', review.user.login + ', not a core reviewer');
         continue;
+      }
+      // only get latest review from a user
+      if(!_.contains(users, review.user.login)) {
+        if(review.state === 'APPROVED') data.approved.push(review.user.login);
+        if(review.state === 'CHANGES_REQUESTED') data.rejected.push(review.user.login);
       }
       users.push(review.user.login);
     }
@@ -472,7 +473,6 @@ function updateHash(repo, milestone) {
 */
 function onSelectChanged(event) {
   $('body > .inner').empty();
-
   $('.key').addClass('disabled');
 
   var repo = $(event.currentTarget).val();
